@@ -69,6 +69,12 @@ do
     -H "Content-Type: ${ContentType}" \
     -H "Authorization: AWS ${AccessKey}:${SignString}" \
     http://${S3Bucket}.s3.amazonaws.com/${fileName}
+    #was the PUT to S3 succesful?
+    curlrc=$?
+    if [ test "$curlrc" != "0" ]; then
+      echo $(date -u) "The HTTPS PUT of ${filePath}/${fileName} to ${S3Bucket}.s3.amazonaws.com failed. Exiting 99." >> ${filePath}/${logFileName}
+      exit 99
+    fi
     # write a few log files entries for debugging
     echo $(date -u) "Sent file ${fileName} to '${S3Bucket}.s3.amazonaws.com/'. Exiting 0." >> ${filePath}/${logFileName}
     rm -f ${filePath}/${fileName}
