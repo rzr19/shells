@@ -1,4 +1,5 @@
 #!/bin/bash
+# should be run from the user's crontab on a fixed schedule, depending on when the exceptions occur.
 
 ftpsap=/usr/users/ftp
 inbox="example@domain.com"
