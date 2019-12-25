@@ -1,0 +1,86 @@
+#!/bin/bash
+
+
+# Check for the 4 webconsole URLs login with admin user i.e are they up
+# 1. Check online status of all 4 Webconsoles on the 4 URLs via HTTP POST
+# 2. if all is up exit 0
+# 3. if one or more is down check individually if previous run of script didn't already signal any as down
+# 4. if first time check , send alert
+# 5. if not first time don't spam, exit soft
+
+urlsrv1="http://servernode1.company.com:34100"
+urlsrv2="http://servernode2.company.com:27199"
+urlsrv3="http://servernode3.company.com:47199"
+urlsrv4="http://servernode4.company.com:24699"
+token='ZW1lcnNvbjE0cTI='
+user='HTTP_USER'
+urlString="/WebConsole/j_spring_security_check?"
+alertInbox="email@inbox.com"
+systems=(srv1 srv2 srv3 srv4)
+
+function check_url(){
+  baseUrl=$1
+  ztoken=$2
+  zLoginUrl=$3
+  secret=$(echo "$ztoken" | /usr/bin/base64 -d)
+
+  /usr/bin/curl -s --location-trusted --max-time 60 -o /dev/null -I -w "%{http_code}" --request POST \
+  --url "${baseUrl}${zLoginUrl}j_username=${user}?&j_password=${secret}" \
+  --header 'Accept: */*' \
+  --header 'Accept-Encoding: gzip, deflate' \
+  --header 'Cache-Control: no-cache' \
+  --header 'Connection: keep-alive' \
+  --header 'cache-control: no-cache'
+}
+
+for i in "${systems[@]}"; do
+  if [ ! -f "$HOME"/check"${i}"HPstatus.txt ]; then
+    echo "The file for ${i} WebConsole monitoring does not exist. Creating it."
+  else
+    echo "The monitor file for ${i} WebConsole monitoring exists. Current value is $(cat "$HOME"/check"${i}"HPstatus.txt)"
+  fi
+done
+
+function check_spam(){
+  httpStatus=$1
+  whichSystem=$2
+  alertInbox=$3
+  previousCheck=$(cat "$HOME"/check"${whichSystem}"HPstatus.txt)
+  echo "For ${whichSystem}: http ${httpStatus} and previous check ${previousCheck}"
+  if [[ "$httpStatus" = "200" && "$previousCheck" = "0" ]]; then
+    echo "0" > "$HOME"/check"${whichSystem}"HPstatus.txt
+    echo "Everything looks good. Webconsole up. Exiting."
+  elif [[ $httpStatus = "200" && $previousCheck = "1" ]]; then
+    echo "0" > "$HOME"/check"${whichSystem}"HPstatus.txt
+    echo "${whichSystem} Webconsole back up and already reported. No need for alerting. Exiting and resetting the spam counter."
+  elif [[ $httpStatus != "200" && $previousCheck = "0" ]]; then
+    echo "1" > "$HOME"/check"${whichSystem}"HPstatus.txt
+    echo "The ${whichSystem} Archive WebConsole is down. Sending alert to ${alertInbox} now."
+    if [ ${whichSystem} = "srv1" ]; then
+    echo -e "The G6 WebConsole is down. Please double check ${urlsrv1}/WebConsole and get in touch with OTS team." | mail -s "!!! ALERT !!! The G6 Archive WebConsole is down." "${alertInbox}"
+    fi
+    if [ ${whichSystem} = "srv2" ]; then
+    echo -e "The N12 WebConsole is down. Please double check ${urlsrv2}/WebConsole and get in touch with OTS team." | mail -s "!!! ALERT !!! The N12 WebConsole is down." "${alertInbox}"
+    fi
+    if [ ${whichSystem} = "srv3" ]; then
+    echo -e "The S12 WebConsole is down. Please double check ${urlsrv3}/WebConsole and get in touch with OTS team." | mail -s "!!! ALERT !!! The S12 WebConsole is down." "${alertInbox}"
+    fi
+    if [ ${whichSystem} = "srv4" ]; then
+    echo -e "The Production WebConsole is down. Please double check ${urlsrv4}/WebConsole and get in touch with OTS team." | mail -s "!!! ALERT !!! The Production WebConsole is down." "${alertInbox}"
+    fi
+  elif [[ ${httpStatus} != "200" && $previousCheck = "1" ]]; then
+    echo "The ${whichSystem} Archive WebConsole is down. Already sent alert for it. Exiting."
+  else
+    echo "Unhandled error for now. Exiting."
+  fi
+}
+
+callsrv1=$(check_url $urlsrv1 $token "$urlString")
+callsrv2=$(check_url $urlsrv2 $token "$urlString")
+callsrv3=$(check_url $urlsrv3 $token "$urlString")
+callsrv4=$(check_url $urlsrv4 $token "$urlString")
+
+check_spam "${callsrv1}" srv1 "${alertInbox}"
+check_spam "${callsrv2}" srv2 "${alertInbox}"
+check_spam "${callsrv3}" srv3 "${alertInbox}"
+check_spam "${callsrv4}" srv4 "${alertInbox}"
