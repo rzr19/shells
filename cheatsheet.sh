@@ -72,7 +72,7 @@ getfacl file
 setfacl -m (modifiy) d(default):o:--- dir/
 setfacl -dm u:bob:rw dir/
 ## Remove ACLs
-setfacl -x (remove) u:bob dir || setfacl -b (--remove-all) dir 
+setfacl -x (remove) u:bob dir || setfacl -b (--remove-all) dir
 # SELinux booleans(8) selinux(8) getsebool(8)
 Every file, dir, port, process has an SE context. The context restricts the entity.
 Types of contexts: type,
@@ -90,3 +90,39 @@ sealert
 apparmor_status
 ## audit
 Aureport -c -d -m
+
+## *** docker ***
+Docker -H <srv_ip>:2375 run hello_world
+Docker diff <cont_id> #changed files list
+Docker commit <cont_id> container_with_changes #create image
+Docker build -t <name> . #build with dockerfile
+Docker run -e HOST=az01 hello_world_python
+Docker ps -a
+docker run -d -t ubuntu:16.04 #run detached as service
+docker run -d -p 8080:8080 tomcat #the gist of docker networks. Published ports host:container.
+docker inspect <container_id> #get container info in json
+docker inspect  --format '{{ .NetworkSettings.IPAddress }}' compassionate_aryabhata #parse the json
+docker run -d -P tomcat # with P let docker do port assignment
+docker port stevie_wonder # get assigned port
+## Cleanup containers, images and volumes
+docker rm $(docker ps --no-trunc -aq) # delete all stopped containers
+docker rmi $(docker images -f "dangling=true" -q)
+docker volume ls -qf dangling=true | xargs -r docker volume rm
+# List images:
+docker image ls
+# Pulling an alpine image:
+docker image pull alpine 
+# Run a container from a locally-available image:
+docker container run -it alpine sh
+# Run a container in the background (-d option) from an image:
+docker container run -d nginx 
+# List only running containers:
+docker container ls 
+# List all containers: 
+docker container ls -a
+# Inject a process inside a running container:
+docker container exec -it <container_id/name> bash
+# Stop a container:
+docker container stop <container id/name> 
+# Delete a container:
+docker container rm  <container id/name>
