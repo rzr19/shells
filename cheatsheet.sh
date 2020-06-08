@@ -126,3 +126,9 @@ docker container exec -it <container_id/name> bash
 docker container stop <container id/name> 
 # Delete a container:
 docker container rm  <container id/name>
+
+## *** java ***
+ /appl/tomcat/java/jdk1.8.0_121/bin/java -cp \ 
+ /home/user/jisql/lib/jisql.jar:/home/user/jisql/lib/jopt-simple-3.2.jar:/home/user/ojdbc8-12.2.0.1.jar \
+ com.xigole.util.sql.Jisql -driver oracle.jdbc.OracleDriver -cstring jdbc:oracle:thin:@/oracle.server.name:1521/oracle.service.name \
+ -user oracle_user -p "p@$$w0rd" -c ";" -formatter default -query "select from user_users;" -trim
