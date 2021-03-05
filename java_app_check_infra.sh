@@ -1,21 +1,21 @@
 #/bin/bash
 #
-# READ-NG infrastructure components availability checker
+# XXX infrastructure components availability checker
 #
 
 function get_stage() {
   if [ -d '/appl/tomcat/apps/ap' ]; then
     read_stage="ap"
-    read_sc_ci="P-11"
-    read_nfs_stage="1835-read_p"
+    read_sc_ci="name1"
+    read_nfs_stage="nfs2"
     rvs_linux_stage="1.2.3.3"
   elif [ -d '/appl/tomcat/apps/aq' ]; then
     read_stage="aq"
-    read_sc_ci="Q-11"
-    read_nfs_stage="1835-read_qs"
+    read_sc_ci="name2"
+    read_nfs_stage="nfs1"
     rvs_linux_stage="1.2.3.4"
   else
-    echo "Unknown stage. This should not be used outside of READ Q or READ P."
+    echo "Unknown stage. This should not be used outside of the 2 stages."
   fi
 }
 
@@ -28,14 +28,11 @@ oracle_driver="ojdbc-8-12.2.0.1.jar"
 jdbc_driver="jdbc2csv-2.1.jar"
 java_home="/appl/tomcat/java/jdk1.8.0_251/bin"
 
-scripts_home="/appl/tomcat/apps/${read_stage}/read/tomcat/scripts"
-catalina_context_conf="/appl/tomcat/apps/${read_stage}/read/tomcat/conf/Catalina/localhost/context.xml.default"
-catalina_home="/appl/tomcat/apps/${read_stage}/read/tomcat"
+scripts_home="/appl/tomcat/apps/${read_stage}/app/tomcat/scripts"
+catalina_context_conf="/appl/tomcat/apps/${read_stage}/app/tomcat/conf/Catalina/localhost/context.xml.default"
+catalina_home="/appl/tomcat/apps/${read_stage}/app/tomcat"
 
-#all remote oracle dbs + 1 for READ_GUI check.
-#If READ_GUI is unavailable all the other schemas are also unavailable.
-#jdbc/read/etl/hls_vw doesn't work because the current password contains " and @ in it
-list_of_dbs=('jdbc/read/etl/read_gui') # to add 'jdbc/read/etl/hls_audi' 'jdbc/read/etl/hls_poznan' 'jdbc/read/etl/hls_vw'
+list_of_dbs=('jdbc/read/etl/read_gui')
 
 infra_components=('nfs' 'oracle' 'tomcat' 'rvs') #should also add F5 checks somehow
 
@@ -65,10 +62,10 @@ function get_db_conn_string() {
 function email_spam_check_monitor_file() {
   component=$1
   if [ ! -f "$scripts_home"/check_"${component}"_spam_email.txt ]; then
-    echo "The monitor file for READ-ng ${i} Infrastucture monitoring does not exist. Creating it."
+    echo "The monitor file for xxx ${i} Infrastucture monitoring does not exist. Creating it."
     echo "0" > ${scripts_home}/check_"${component}"_spam_email.txt
   else
-    echo "The monitor file for READ-ng ${component} Infrastructure monitoring exists."
+    echo "The monitor file for xxx ${component} Infrastructure monitoring exists."
   fi
 }
 
@@ -77,10 +74,10 @@ function email_spam_check_monitor_file() {
 # Common Body for email variable:
 body_shortcut="Email."
 
-nfs_shortcut="AUTOMATIC ALERT: The READ-NG ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} is not available."
-tomcat_shortcut="AUTOMATIC ALERT: The READ-NG ${read_sc_ci} Tomcat instance is not running."
-oracle_shortcut="AUTOMATIC ALERT: The READ-NG ${read_sc_ci} Oracle backend ${db_conn_string} is not available."
-rvs_shortcut="AUTOMATIC ALERT: The READ-NG ${read_sc_ci} RVS station ${rvs_linux_stage} is not available."
+nfs_shortcut="AUTOMATIC ALERT: The XXX ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} is not available."
+tomcat_shortcut="AUTOMATIC ALERT: The XXX ${read_sc_ci} Tomcat instance is not running."
+oracle_shortcut="AUTOMATIC ALERT: The XXX ${read_sc_ci} Oracle backend ${db_conn_string} is not available."
+rvs_shortcut="AUTOMATIC ALERT: The XXX ${read_sc_ci} RVS station ${rvs_linux_stage} is not available."
 
 
 function email_alert() {
@@ -89,37 +86,37 @@ function email_alert() {
     nfs)
       previous_alert_check_nfs=$(cat ${scripts_home}/check_"${type_of_alert}"_spam_email.txt)
       if [[ ${previous_alert_check}_nfs -eq 0 ]]; then
-        echo "The READ-NG ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} ${body_shortcut}" | mail -s "${nfs_shortcut}" ${alert_inbox}
+        echo "The XXX ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} ${body_shortcut}" | mail -s "${nfs_shortcut}" ${alert_inbox}
         echo "1" > ${scripts_home}/check_nfs_spam_email.txt
       else
-        echo "The READ-NG ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} is not available. Already sent alert for it. Exiting."
+        echo "The XXX ${read_sc_ci} NFS mount point /nfs/${read_nfs_stage} is not available. Already sent alert for it. Exiting."
       fi
       ;;
     tomcat)
       previous_alert_check_tomcat=$(cat ${scripts_home}/check_"${type_of_alert}"_spam_email.txt)
       if [[ ${previous_alert_check_tomcat} -eq 0 ]]; then
-        echo "The READ-NG ${read_sc_ci} Tomcat instance ${body_shortcut}" | mail -s "${tomcat_shortcut}" ${alert_inbox}
+        echo "The XXX ${read_sc_ci} Tomcat instance ${body_shortcut}" | mail -s "${tomcat_shortcut}" ${alert_inbox}
         echo "1" > ${scripts_home}/check_tomcat_spam_email.txt
       else
-        echo "The READ-NG ${read_sc_ci} Tomcat instance is not running. Already sent alert for it. Exiting."
+        echo "The XXX ${read_sc_ci} Tomcat instance is not running. Already sent alert for it. Exiting."
       fi
       ;;
     oracle)
       previous_alert_check_oracle=$(cat ${scripts_home}/check_"${type_of_alert}"_spam_email.txt)
       if [[ ${previous_alert_check_oracle} -eq 0 ]]; then
-        echo "The READ-NG ${read_sc_ci} Oracle backend ${db_conn_string} ${body_shortcut}" | mail -s "${oracle_shortcut}" ${alert_inbox}
+        echo "The XXX ${read_sc_ci} Oracle backend ${db_conn_string} ${body_shortcut}" | mail -s "${oracle_shortcut}" ${alert_inbox}
         echo "1" > ${scripts_home}/check_oracle_spam_email.txt
       else
-        echo "The READ-NG ${read_sc_ci} Oracle backend ${db_conn_string} is not available. Already sent alert for it. Exiting."
+        echo "The XXX ${read_sc_ci} Oracle backend ${db_conn_string} is not available. Already sent alert for it. Exiting."
       fi
       ;;
     rvs)
       previous_alert_check_rvs=$(cat ${scripts_home}/check_"${type_of_alert}"_spam_email.txt)
       if [[ ${previous_alert_check_rvs} -eq 0 ]]; then
-        echo "The READ-NG ${read_sc_ci} RVS station ${read_rvs_stage} ${body_shortcut}" | mail -s "${rvs_shortcut}" ${alert_inbox}
+        echo "The XXX ${read_sc_ci} RVS station ${read_rvs_stage} ${body_shortcut}" | mail -s "${rvs_shortcut}" ${alert_inbox}
         echo "1" > ${scripts_home}/check_rvs_spam_email.txt
       else
-        echo "The READ-NG ${read_sc_ci} RVS station ${rvs_linux_stage} is not available. Already sent alert for it. Exiting."
+        echo "The XXX ${read_sc_ci} RVS station ${rvs_linux_stage} is not available. Already sent alert for it. Exiting."
       fi
       ;;
     *)
@@ -128,7 +125,6 @@ function email_alert() {
   esac
 }
 
-#Checks the READ NFS mount point availability.
 function check_nfs() {
   email_spam_check_monitor_file nfs
   #to test, change filename
@@ -141,21 +137,19 @@ function check_nfs() {
   fi
 }
 
-#Checks the READ RVS stations' network availability.
 function check_rvs() {
   email_spam_check_monitor_file rvs
   rvs_stage=$1
   ping -q -c 5 ${rvs_stage} > /dev/null
   #to test, change 0 to 1
   if [[ $? -eq 0 ]]; then
-    echo "The READ RVS station is available via TCP/IP. Moving on."
+    echo "The xxx RVS station is available via TCP/IP. Moving on."
     echo "0" > ${scripts_home}/check_rvs_spam_email.txt
   else
     email_alert rvs
   fi
 }
 
-#Checks the Tomcat instance availability on the READ server itself
 function check_tomcat() {
   email_spam_check_monitor_file tomcat
   ps -ef | grep -v 'grep' | grep -o $(cat ${catalina_home}/catalina.pid)
@@ -163,12 +157,11 @@ function check_tomcat() {
   if [ ${PIPESTATUS[1]} -ne 0 ]; then
     email_alert tomcat
   else
-    echo "The READ Tomcat instance is available. Moving on."
+    echo "The xxx Tomcat instance is available. Moving on."
     echo "0" > ${scripts_home}/check_tomcat_spam_email.txt
   fi
 }
 
-#Checks the Oracle backend availability
 function check_oracle() {
   for i in "${list_of_dbs[@]}"; do
     email_spam_check_monitor_file oracle
