@@ -24,6 +24,11 @@ dG ## delete all below line
 -u or u # user
 K # kill
 
+## openssl
+for f in $(ls *.pem); do openssl x509 -in $f -noout -enddate >> expiration_dates.txt && echo $f >> expiration_dates.txt; done ## get dates from gazillion pem files
+cat expiration_dates.txt | sed ':a;N;$!ba;s/GMT\n/GMT /g' ## sort and paginate them
+
+
 ## *** misc commands ***
 Ctrl + U # clear line
 Ctrl + K # clear line from cursor position
