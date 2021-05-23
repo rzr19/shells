@@ -18,6 +18,7 @@ dG ## delete all below line
 << ## outdent curr
 :se ai / noai ## enable auto indent
 :se wm=8 ## enable wrap margin
+:se nu ## add line numbers
 
 ## *** top ***
 -c or c # full paths
@@ -27,7 +28,6 @@ K # kill
 ## openssl
 for f in $(ls *.pem); do openssl x509 -in $f -noout -enddate >> expiration_dates.txt && echo $f >> expiration_dates.txt; done ## get dates from gazillion pem files
 cat expiration_dates.txt | sed ':a;N;$!ba;s/GMT\n/GMT /g' ## sort and paginate them
-
 
 ## *** misc commands ***
 Ctrl + U # clear line
