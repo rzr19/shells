@@ -109,27 +109,17 @@ docker inspect <container_id> #get container info in json
 docker inspect  --format '{{ .NetworkSettings.IPAddress }}' compassionate_aryabhata #parse the json
 docker run -d -P tomcat # with P let docker do port assignment
 docker port stevie_wonder # get assigned port
-## Cleanup containers, images and volumes
 docker rm $(docker ps --no-trunc -aq) # delete all stopped containers
 docker rmi $(docker images -f "dangling=true" -q)
 docker volume ls -qf dangling=true | xargs -r docker volume rm
-# List images:
 docker image ls
-# Pulling an alpine image:
 docker image pull alpine 
-# Run a container from a locally-available image:
 docker container run -it alpine sh
-# Run a container in the background (-d option) from an image:
 docker container run -d nginx 
-# List only running containers:
 docker container ls 
-# List all containers: 
 docker container ls -a
-# Inject a process inside a running container:
 docker container exec -it <container_id/name> bash
-# Stop a container:
 docker container stop <container id/name> 
-# Delete a container:
 docker container rm  <container id/name>
 
 ## *** java ***

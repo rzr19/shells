@@ -1,3 +1,10 @@
+## 0. Misc
+az next ## check what you could do after previous az cmd
+az interactive ## with intellisense! go inside a scope with %%vm && %%image then go back with %%.. 
+az account list-locations \ --query "[].{Region:name}" \ --out table
+$token =  az account get-access-token --resource https://vault.azure.net 
+az rest --method get --url $azure_resource_url
+
 ## 1. ACI https://hub.docker.com/_/microsoft-azuredocs-aci-helloworld 
 az login -u $username -p $password
 az group list
@@ -27,16 +34,14 @@ az webapp config appsettings set --settings DBHOST="demo123srv" DBNAME="pollsdb"
 
 ## 3. Linux VMs + dockerd https://snipeitapp.com/
 az vm image list --offer centos
-az vm create -g $resource_group --location centralus --name demovm123 --image UbuntuLTS --admin-username demo123user --generate-ssh-keys
+az vm create -g $resource_group --location centralus --name demovm123 --image centos --admin-username demo123user --generate-ssh-keys
 az vm open-port --port 8082 -g $resource_group --name demovm123
 az vm list
 az vm list-ip-addresses -g $resource_group -n demovm123
-    ## Next setup docker and the 2 containers
-    ssh demo123user@demovm123
-    sudo yum -y install yum-utils
-    sudo yum-config-manager –-add-repo https://download.docker.com/linux/centos/docker-ce.repo
-    sudo yum -y install docker-ce ## it installs also docker-ce-cli and containerd.io
-    sudo systemctl start docker && sudo docker run hello-hello_world
+az vm run-command invoke -g $rg -n demovm123 --command-id RunShellScript --scripts \ 
+"sudo yum -y install yum-utils && sudo yum-config-manager –-add-repo https://download.docker.com/linux/centos/docker-ce.repo \ 
+&& sudo yum -y install docker-ce && sudo systemctl start docker"
+
     mkdir -p /snipeit/snipe-mysql && mkdir /snipeit/snipe-conf
     sudo docker run --name snipe-mysql -d -e MYSQL_ROOT_PASSWORD="3yyDOLC6VPFG&5gk#yNl" -e MYSQL_DATABASE=snipe \ 
     -e MYSQL_USER=snipe -e MYSQL_PASSWORD="29fMXli8ZRQCXnxnUEG" -e TZ=America/Chicago -p 127.0.0.1:3306:3306 \ 
@@ -47,3 +52,25 @@ az vm list-ip-addresses -g $resource_group -n demovm123
     --restart unless-stopped snipe/snipe-it
     #Start the app
     sudo docker start snipe-it
+
+## 4. Storage Accounts
+az storage account check-name --name demoaccount01
+az storage account create -g $resource_group --name demoaccount01 --location westus --sku Standard_RAGRS --kind StorageV2
+az storage account list -o table
+az storage container create --name demostcontainer01 --public-access blob
+az storage container list --account-name demoaccount01 -o table
+az storage azcopy blob upload --container demostcontainer01 --account-name demoaccount01 -s helloworld.sh -d helloworld.sh
+
+## 5. Azure Key Vault
+az keyvault create -g $resource_group --location centralus --name demovault012345 --network-acls-ips 3.4.5.0/24 4.5.6.0/24
+az keyvault list
+az keyvault secret set --name demosecret01 --vault-name demovault012345 --value h3h3h3
+
+## 6. Az network vnet
+## Reference: https://docs.microsoft.com/en-us/cli/azure/network/vnet?view=azure-cli-latest
+
+
+
+
+
+
