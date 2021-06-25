@@ -97,31 +97,32 @@ apparmor_status
 Aureport -c -d -m
 
 ## *** docker ***
-Docker -H <srv_ip>:2375 run hello_world
-Docker diff <cont_id> #changed files list
-Docker commit <cont_id> container_with_changes #create image
+Docker -H $host_ip:2375 run hello_world
+Docker diff $containerid #changed files list
+Docker commit $containerid container_with_changes #create image
 Docker build -t <name> . #build with dockerfile
 Docker run -e HOST=az01 hello_world_python
 Docker ps -a
 docker run -d -t ubuntu:16.04 #run detached as service
 docker run -d -p 8080:8080 tomcat #the gist of docker networks. Published ports host:container.
-docker inspect <container_id> #get container info in json
+docker inspect $containerid #get container info in json
 docker inspect  --format '{{ .NetworkSettings.IPAddress }}' compassionate_aryabhata #parse the json
 docker run -d -P tomcat # with P let docker do port assignment
 docker port stevie_wonder # get assigned port
 docker rm $(docker ps --no-trunc -aq) # delete all stopped containers
 docker rmi $(docker images -f "dangling=true" -q)
 docker volume ls -qf dangling=true | xargs -r docker volume rm
+docker volume inspect $volume 
 docker image ls
 docker image pull alpine 
 docker container run -it alpine sh
 docker container run -d nginx 
 docker container ls 
 docker container ls -a
-docker container exec -it <container_id/name> bash
-docker container stop <container id/name> 
-docker container rm  <container id/name>
-
+docker container exec -it $containerid bash
+docker container stop $containerid
+docker container rm $containerid
+docker network create $network_name
 ## *** java ***
  /appl/tomcat/java/jdk1.8.0_121/bin/java -cp \ 
  /home/user/jisql/lib/jisql.jar:/home/user/jisql/lib/jopt-simple-3.2.jar:/home/user/ojdbc8-12.2.0.1.jar \
